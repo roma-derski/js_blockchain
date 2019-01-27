@@ -19,6 +19,9 @@ Blockchain.prototype.createNewBlock = function(nonce, prevoiusBlockHash, hash) {
     return newBlock;
 }
 
+Blockchain.prototype.getLastBlock = function() {
+    return this.chain[this.chain.length - 1];
+}
 
 
 
