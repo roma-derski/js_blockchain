@@ -1,0 +1,15 @@
+{
+  "name": "blockchain_js",
+  "version": "0.1.0",
+  "description": "PoW blockchain made with JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "blockchain",
+    "javascript"
+  ],
+  "author": "fa1keH",
+  "license": "ISC"
+}
