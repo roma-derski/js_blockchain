@@ -3,12 +3,12 @@ function Blockchain() {
     this.newTransactions = [];
 }
 
-Blockchain.prototype.createNewBlock = function(nonce, prevoiusBlockHash, Hash) {
+Blockchain.prototype.createNewBlock = function(nonce, prevoiusBlockHash, hash) {
     const newBlock = {
         index: this.chain.length + 1,
-        timestamp: Data.now(),
+        timestamp: Date.now(),
         transactions: this.newTransactions, // put all pending txs into this new block
-        nonce = nonce,
+        nonce: nonce,
         hash: hash,
         prevoiusBlockHash: prevoiusBlockHash
     };
@@ -19,5 +19,12 @@ Blockchain.prototype.createNewBlock = function(nonce, prevoiusBlockHash, Hash) {
     return newBlock;
 }
 
+
+
+
+
+
+
+module.exports = Blockchain;
 
 
