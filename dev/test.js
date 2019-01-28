@@ -15,19 +15,23 @@ qacoin.createNewBlock(25, 'CCC333', 'DDD444');
 const previousBlockHash = 'ASDFA234SDFAS234DFADSFA234SDFASD1234';
 const currentBlockData = [
     {
-        amount: 10,
+        amount: 11,
         sender: 'Alice123',
         recipient: 'Bob234'
     },
     {
-        amount: 20,
+        amount: 19,
         sender: 'Bob234',
         recipient: 'Jim244'
     }
 ]
 const nonce = 100;
 
-const hash = qacoin.hashBlock(previousBlockHash, currentBlockData, nonce);
+
+
+const findNonce = qacoin.proofOfWork(previousBlockHash, currentBlockData);
+
+const hash = qacoin.hashBlock(previousBlockHash, currentBlockData, findNonce);
 
 //console.dir(qacoin.chain[2]);
-console.log(hash);
+console.log(findNonce, hash);
