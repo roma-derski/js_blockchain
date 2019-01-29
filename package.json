@@ -4,7 +4,8 @@
   "description": "PoW blockchain made with JS",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "node dev/test.js",
+    "start": "nodemon --watch dev -e js dev/api.js"
   },
   "keywords": [
     "blockchain",
@@ -13,6 +14,9 @@
   "author": "fa1keH",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.9",
     "sha256": "^0.2.0"
   }
 }

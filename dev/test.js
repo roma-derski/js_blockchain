@@ -33,5 +33,5 @@ const findNonce = qacoin.proofOfWork(previousBlockHash, currentBlockData);
 
 const hash = qacoin.hashBlock(previousBlockHash, currentBlockData, findNonce);
 
-//console.dir(qacoin.chain[2]);
+//console.dir(qacoin);
 console.log(findNonce, hash);
