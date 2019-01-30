@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const Blockchain = require('./blockchain');
+const uuidv1 = require('uuid/v1');
+
+const nodeAddress = uuidv1().split('-').join(''); //removing dashes
 
 const thecoin = new Blockchain();
 
@@ -22,8 +25,25 @@ app.post('/transaction', (req, res) => {
 });
 
 app.get('/mine', (req, res) => {
-    res.send('Hi dude');
+    const lastBlock = thecoin.getLastBlock();
+    const lastBlockHash = lastBlock['hash'];
+    const currentBlockData = {
+        transactions: thecoin.pendingTransactions,
+        index: lastBlock['index'] + 1,
+        // add other props
+    }
+    const nonce = thecoin.proofOfWork(lastBlockHash, currentBlockData);
+    const blockHash = thecoin.hashBlock(lastBlockHash, currentBlockData, nonce);       
+    
+    thecoin.createNewTransaction(12.5, "00", nodeAddress);
+
+    const newBlock = thecoin.createNewBlock(nonce, lastBlockHash, blockHash);
+    
+    res.json({
+        note: "New block mined!",
+        block: newBlock
+    })
 });
 
 
-app.listen(3000, () => console.log('listening on 3000...'));
+app.listen(3000, () => console.log('listening on 3000...'));uuidv1
