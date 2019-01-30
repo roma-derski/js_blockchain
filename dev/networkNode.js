@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const Blockchain = require('./blockchain');
 const uuidv1 = require('uuid/v1');
+const PORT = process.argv[2];
 
 const nodeAddress = uuidv1().split('-').join(''); //removing dashes
 
@@ -46,4 +47,4 @@ app.get('/mine', (req, res) => {
 });
 
 
-app.listen(3000, () => console.log('listening on 3000...'));uuidv1
+app.listen(PORT, () => console.log(`listening on ${PORT}...`));
