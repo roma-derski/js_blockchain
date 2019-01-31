@@ -81,7 +81,13 @@ app.post('/register-and-broadcast-node', (req, res) => {
 })
 
 app.post('/register-node', (req, res) => {
-
+    const newNodeUrl = req.body.networkNodeUrl;
+    const nodeNotRegistered = thecoin.networkNodes.indexOf(newNodeUrl) == -1;
+    const nodeNotCurrent = thecoin.currentNodeUrl !== newNodeUrl;
+    if (nodeNotRegistered && nodeNotCurrent) {
+        thecoin.networkNodes.push(newNodeUrl);
+    }
+    res.json({ note: 'New node registered!'});
 })
 
 app.post('/register-node-bulk', (req, res) => {
