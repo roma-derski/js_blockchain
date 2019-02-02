@@ -18,10 +18,11 @@
   "author": "fa1keH",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "nodemon": "^1.18.9",
-    "request-promise": "^4.2.2",
+    "request": "^2.88.0",
     "sha256": "^0.2.0",
     "uuid": "^3.3.2"
   }

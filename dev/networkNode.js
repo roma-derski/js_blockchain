@@ -4,7 +4,11 @@ const bodyParser = require('body-parser');
 const Blockchain = require('./blockchain');
 const uuidv1 = require('uuid/v1');
 const PORT = process.argv[2];
-const rp = require('request-promise');
+//const rp = require('request-promise');
+const axios = require('axios');
+axios.defaults.headers.common = {
+    "Content-Type": "application/json"
+  }
 
 const nodeAddress = uuidv1().split('-').join(''); //removing dashes
 
@@ -12,6 +16,11 @@ const thecoin = new Blockchain();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+process.on('unhandledRejection', error => {
+    console.error('unhandledRejection...', error)
+})
+
 
 app.get('/', (req, res) => {
     res.send('Hi dude, want some blockchain?');
@@ -32,7 +41,7 @@ app.get('/mine', (req, res) => {
     const currentBlockData = {
         transactions: thecoin.pendingTransactions,
         index: lastBlock['index'] + 1,
-        // add other props
+        // TODO: add other props
     }
     const nonce = thecoin.proofOfWork(lastBlockHash, currentBlockData);
     const blockHash = thecoin.hashBlock(lastBlockHash, currentBlockData, nonce);       
@@ -57,41 +66,59 @@ app.post('/register-and-broadcast-node', (req, res) => {
     const regNodesPromises = [];
     thecoin.networkNodes.forEach(networkNodeUrl => {
         const requestOptions = {
-            uri: networkNodeUrl + '/register-node',
-            method: 'POST',
-            body: { networkNodeUrl: newNodeUrl },
-            json: true
+            baseURL: networkNodeUrl,
+            url: '/register-node',
+            method: 'post',
+            data: { newNodeUrl: newNodeUrl }
         }
-        regNodesPromises.push(pr(requestOptions));
+        
+        regNodesPromises.push(axios.request(requestOptions));
     });
     
+
     Promise.all(regNodesPromises)
-    .then(data => {
+    .then( () => {
         const bulkRegisterOptions = {
-            uri: newNodeUrl + '/register-node-bulk',
-            method: 'POST',
-            body: { allNetworkNodes: [...thecoin.networkNodes, thecoin.currentNodeUrl] },
-            json: 'true'
+            baseURL: newNodeUrl,
+            url: '/register-nodes-bulk',
+            method: 'post',
+            data: { allNetworkNodes: [...thecoin.networkNodes, thecoin.currentNodeUrl] }
         };
-        return rp(bulkRegisterOptions)
+
+        return axios.request(bulkRegisterOptions);
     })
-    .then(data => {
+    .then( () => {
         res.json({ note: 'New node registered with network!'})
     })
-})
+    .catch(error => {
+        res.send(error);
+    });
+});
 
+// send url of the new node to network to register it on all nodes
 app.post('/register-node', (req, res) => {
     const newNodeUrl = req.body.newNodeUrl;
     const nodeNotRegistered = thecoin.networkNodes.indexOf(newNodeUrl) == -1;
     const nodeNotCurrent = thecoin.currentNodeUrl !== newNodeUrl;
     if (nodeNotRegistered && nodeNotCurrent) {
         thecoin.networkNodes.push(newNodeUrl);
-        res.json({ note: 'New node registered!'});
     }
+    res.json({ note: 'New node registered!'});
 })
 
-app.post('/register-node-bulk', (req, res) => {
-
+// let the new node register all nodes already present in network
+app.post('/register-nodes-bulk', (req, res) => {
+    const allNetworkNodes = req.body.allNetworkNodes;
+    allNetworkNodes.forEach(networkNodeUrl => {
+        const nodeNotRegistered = thecoin.networkNodes.indexOf(networkNodeUrl) == -1;
+        const notCurrentNode = thecoin.currentNodeUrl !== networkNodeUrl;
+        if (nodeNotRegistered && notCurrentNode) {
+            thecoin.networkNodes.push(networkNodeUrl);
+        }
+    })
+    res.json({ node: 'Bulk registration done!'});
 })
+
+
 
 app.listen(PORT, () => console.log(`listening on ${PORT}...`));
