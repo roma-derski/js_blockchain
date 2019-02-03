@@ -6,9 +6,9 @@ const uuidv1 = require('uuid/v1');
 const PORT = process.argv[2];
 //const rp = require('request-promise');
 const axios = require('axios');
-axios.defaults.headers.common = {
-    "Content-Type": "application/json"
-  }
+//axios.defaults.headers.common = {
+//    "Content-Type": "application/json"
+//}
 
 const nodeAddress = uuidv1().split('-').join(''); //removing dashes
 
@@ -18,7 +18,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 process.on('unhandledRejection', error => {
-    console.error('unhandledRejection...', error)
+    console.error('Caught exception: ', error);
+    process.exit(1);
 })
 
 
@@ -31,9 +32,37 @@ app.get('/blockchain', (req, res) => {
 });
 
 app.post('/transaction', (req, res) => {
-    const blockIndex = thecoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
-    res.json({ note: `Transaction will be added to block ${blockIndex}`});
+    const newTransaction = req.body;
+    const blockIndex = thecoin.addTxToPendingTxs(newTransaction);
+    res.json({ note: `Transaction to be added to block ${blockIndex}.`});
 });
+
+app.post('/transaction/broadcast', (req, res) => {
+    const newTx = thecoin
+        .createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+    thecoin.addTxToPendingTxs(newTx);
+
+    // TODO: refactor to .map
+    const broadcastTxPromises = [];
+    thecoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            baseURL: networkNodeUrl,
+            url: '/transaction',
+            method: 'post',
+            data: newTx
+        }
+        broadcastTxPromises.push(axios.request(requestOptions));
+    })
+
+    Promise.all(broadcastTxPromises)
+    .then( () => {
+        res.json({ note: 'New transaction created and broadcasted!'})
+    })
+    .catch(error => {
+        console.log('error: -----', error);
+        res.send(error);
+    });
+})
 
 app.get('/mine', (req, res) => {
     const lastBlock = thecoin.getLastBlock();
