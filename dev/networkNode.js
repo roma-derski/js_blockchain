@@ -73,15 +73,37 @@ app.get('/mine', (req, res) => {
         // TODO: add other props
     }
     const nonce = thecoin.proofOfWork(lastBlockHash, currentBlockData);
-    const blockHash = thecoin.hashBlock(lastBlockHash, currentBlockData, nonce);       
-    
-    thecoin.createNewTransaction(12.5, "00", nodeAddress);
-
+    const blockHash = thecoin.hashBlock(lastBlockHash, currentBlockData, nonce);      
     const newBlock = thecoin.createNewBlock(nonce, lastBlockHash, blockHash);
-    
-    res.json({
-        note: "New block mined!",
-        block: newBlock
+
+    newBlockPromises = [];
+    thecoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            baseURL: networkNodeUrl,
+            url: '/recieve-new-block',
+            method: 'post',
+            data: { newBlock: newBlock }
+        }
+        
+        newBlockPromises.push(axios.request(requestOptions));
+    })
+
+    Promise.all(newBlockPromises)
+    .then( () => {
+        const newBlockRewardTx = thecoin.createNewTransaction(12.5, "00", nodeAddress);
+        const requestOptions = {
+            baseURL: thecoin.currentNodeUrl,
+            url: '/transaction/broadcast',
+            method: 'post',
+            data: newBlockRewardTx
+        }
+        return axios.request(requestOptions);
+    })
+    .then( () => {
+        res.json({
+            note: "New block mined and broadcasted!",
+            block: newBlock
+        })
     })
 });
 
