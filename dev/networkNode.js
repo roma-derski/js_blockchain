@@ -60,7 +60,7 @@ app.post('/transaction/broadcast', (req, res) => {
     })
     .catch(error => {
         console.log('error: -----', error);
-        res.send(error);
+        //res.send(error);
     });
 })
 
@@ -80,9 +80,9 @@ app.get('/mine', (req, res) => {
     thecoin.networkNodes.forEach(networkNodeUrl => {
         const requestOptions = {
             baseURL: networkNodeUrl,
-            url: '/recieve-new-block',
+            url: '/receive-new-block',
             method: 'post',
-            data: { newBlock: newBlock }
+            data: { newBlock }
         }
         
         newBlockPromises.push(axios.request(requestOptions));
@@ -107,6 +107,27 @@ app.get('/mine', (req, res) => {
     })
 });
 
+app.post('/receive-new-block', (req, res) => {
+    const newBlock = req.body.newBlock;
+    const lastBlock = thecoin.getLastBlock();
+    const correctHash = lastBlock['hash'] === newBlock['previousBlockHash'];
+    const correctIndex = (lastBlock['index'] + 1) === newBlock['index'];
+    
+    if (correctHash && correctIndex) {
+        thecoin.chain.push(newBlock);
+        thecoin.pendingTransactions = [];
+        res.json({ 
+            note: 'New block accepted!',
+            newBlock
+        });
+    } else {
+        res.json({ 
+            note: 'New block rejected :(',
+            newBlock
+        })
+    }
+
+})
 
 app.post('/register-and-broadcast-node', (req, res) => {
     const newNodeUrl = req.body.newNodeUrl;
@@ -120,7 +141,7 @@ app.post('/register-and-broadcast-node', (req, res) => {
             baseURL: networkNodeUrl,
             url: '/register-node',
             method: 'post',
-            data: { newNodeUrl: newNodeUrl }
+            data: { newNodeUrl }
         }
         
         regNodesPromises.push(axios.request(requestOptions));

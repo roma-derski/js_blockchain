@@ -12,14 +12,14 @@ function Blockchain() {
     this.createNewBlock(100, '0', '0'); // arbitrary params for a genesis block
 }
 
-Blockchain.prototype.createNewBlock = function(nonce, prevoiusBlockHash, hash) {
+Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
     const newBlock = {
         index: this.chain.length + 1,
         timestamp: Date.now(),
         transactions: this.pendingTransactions, // put all pending txs into this new block
         nonce: nonce,
         hash: hash,
-        prevoiusBlockHash: prevoiusBlockHash
+        previousBlockHash: previousBlockHash
     };
 
     this.pendingTransactions = []; // starting over for the next block
@@ -65,6 +65,21 @@ Blockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData)
     return nonce;
 }
 
+Blockchain.prototype.chainIsValid = function(blockchain) {
+    let validChain = true;
+
+    for (let i = 1; i < blockchain.length; i++) {
+        const currentBlock = blockchain[i];
+        const previousBlock = blockchain[i-1];
+        const blockHash = this.hashBlock(previousBlock['hash']);
+        
+        if (currentBlock['previousBlockHash'] !== previousBlock['hash']) {
+            validChain = false;
+            break;
+        }
+    };
+    return validChain;
+};
 
 
 module.exports = Blockchain;
