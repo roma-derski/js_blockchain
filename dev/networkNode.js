@@ -69,8 +69,8 @@ app.get('/mine', (req, res) => {
     const lastBlockHash = lastBlock['hash'];
     const currentBlockData = {
         transactions: thecoin.pendingTransactions,
-        index: lastBlock['index'] + 1,
-        // TODO: add other props
+        index: lastBlock['index'] + 1
+        // TODO: include other props?
     }
     const nonce = thecoin.proofOfWork(lastBlockHash, currentBlockData);
     const blockHash = thecoin.hashBlock(lastBlockHash, currentBlockData, nonce);      

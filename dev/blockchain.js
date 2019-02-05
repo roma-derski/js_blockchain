@@ -9,7 +9,7 @@ function Blockchain() {
     this.currentNodeUrl = currentNodeUrl;
     this.networkNodes = [];
 
-    this.createNewBlock(100, '0', '0'); // arbitrary params for a genesis block
+    this.createNewBlock(100, '0', '0'); // arbitrary params for a GENESIS block
 }
 
 Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
@@ -71,13 +71,34 @@ Blockchain.prototype.chainIsValid = function(blockchain) {
     for (let i = 1; i < blockchain.length; i++) {
         const currentBlock = blockchain[i];
         const previousBlock = blockchain[i-1];
-        const blockHash = this.hashBlock(previousBlock['hash']);
-        
+        const blockHash = this.hashBlock(
+            previousBlock['hash'], 
+            // TODO check if can make it shorter
+            {
+                transactions: currentBlock['transactions'], 
+                index: currentBlock['index']
+            },
+            currentBlock['nonce']
+            );
+        if (blockHash.substring(0,4) !== '0000') {
+            validChain = false;
+            break;
+        }
         if (currentBlock['previousBlockHash'] !== previousBlock['hash']) {
             validChain = false;
             break;
         }
     };
+    
+    const genesisBlock = blockchain[0];
+    const correctNonce = genesisBlock['nonce'] === 100;
+    const correctPreviousBlockHash = genesisBlock['previousBlockHash'] === '0';
+    const correctHash = genesisBlock['hash'] = '0';
+    const correctTxs = genesisBlock['transactions'].length === 0;
+    if (!correctNonce || !correctPreviousBlockHash || !correctHash || !correctTxs) {
+        validChain = false;
+    }
+    
     return validChain;
 };
 
