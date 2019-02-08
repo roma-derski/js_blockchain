@@ -210,13 +210,14 @@ app.get('/consensus', (req, res) => {
         let newPendingTxs = null;
 
         blockchains.forEach(blockchain => {
+            blockchain = blockchain.data;
             if (blockchain.chain.length > maxChainLength) {
                 maxChainLength = blockchain.chain.length;
-                newLongestChain = blockchain;
+                newLongestChain = blockchain.chain;
                 newPendingTxs = blockchain['pendingTransactions'];
             };
         });
-
+        
         if (!newLongestChain || (newLongestChain && !thecoin.chainIsValid(newLongestChain))) {
             res.json({
                 note: 'Current chain has not been replaced!',
@@ -233,6 +234,26 @@ app.get('/consensus', (req, res) => {
     });
 });
 
+app.get('/block/:blockHash', (req, res) => {
+    const block = thecoin.getBlock(req.params.blockHash);
+    res.json({block});
+});
+
+app.get('/transaction/:transactionId', (req, res) => {
+    const txData = thecoin.getTransaction(req.params.transactionId);
+    res.json({
+        transaction: txData.thatTx,
+        block: txData.thatBlock
+    });
+});
+
+app.get('/address/:address', (req, res) => {
+    const addressData = thecoin.getAddressData(req.params.address);
+    res.json({
+        transactions: addressData.addressTransactions,
+        balance: addressData.addressBalance
+    });
+});
 
 
 app.listen(PORT, () => console.log(`listening on ${PORT}...`));
