@@ -236,7 +236,7 @@ app.get('/consensus', (req, res) => {
 
 app.get('/block/:blockHash', (req, res) => {
     const block = thecoin.getBlock(req.params.blockHash);
-    res.json({block});
+    res.json({ block });
 });
 
 app.get('/transaction/:transactionId', (req, res) => {
@@ -249,10 +249,7 @@ app.get('/transaction/:transactionId', (req, res) => {
 
 app.get('/address/:address', (req, res) => {
     const addressData = thecoin.getAddressData(req.params.address);
-    res.json({
-        transactions: addressData.addressTransactions,
-        balance: addressData.addressBalance
-    });
+    res.json({ addressData });
 });
 
 app.get('/block-explorer', (req, res) => {
