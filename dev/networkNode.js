@@ -4,11 +4,8 @@ const bodyParser = require('body-parser');
 const Blockchain = require('./blockchain');
 const uuidv1 = require('uuid/v1');
 const PORT = process.argv[2];
-//const rp = require('request-promise');
 const axios = require('axios');
-//axios.defaults.headers.common = {
-//    "Content-Type": "application/json"
-//}
+//axios.defaults.headers.common = { "Content-Type": "application/json" };
 
 const nodeAddress = uuidv1().split('-').join(''); //removing dashes
 
